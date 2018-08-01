@@ -1,0 +1,286 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+
+/**
+ * Conversion program which converts from decimal(base10) to binary(base2) and vice vera.
+ * 
+ * @author  C. Stewart
+ * @version 1.0
+ * @since   24-07-2018
+ * 
+ */ 
+
+/**
+ * SwingBinConv is the main class of the BinaryConverter program. It creates the UI and is the main program entry
+ * point. It uses the Swing API for the look and feel of the UI. The binary/decimal conversions are carried out by
+ * the BinConv class which is called from within methods in this class.
+ */
+public class SwingBinConv {
+  
+   private static final int FRAME_WIDTH = 300;
+   private static final int FRAME_HEIGHT = 500;
+   private static final int FONT_SIZE = 16;
+   private static final int EAST_PANEL_ROWS = 3;
+   private static final int EAST_PANEL_COLUMNS = 1;
+   private static final int CENTER_PANEL_ROWS = 4;
+   private static final int CENTER_PANEL_COLUMNS = 3;
+   private static final int MAX_DIGIT_BUTTONS = 10;
+   
+   private static final String FRAME_NAME = "BinaryConverter";
+  
+   private JFrame frame;
+   private JPanel centerPanel;
+   private JPanel northPanel;
+   private JPanel eastPanel;
+   private JLabel modeDisplay;
+   private JLabel textDisplay;
+   private JButton clearButton;
+   private JButton equalsButton;
+   private JButton modeButton;
+   private GridLayout eastPanelLayout;
+   private GridLayout centerPanelLayout;
+   private GridBagLayout northPanelLayout;
+   private String[] digits = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"};
+   private ArrayList<JButton> numberButtons;
+   private Font myFont;
+   private boolean isBinaryMode = true;
+
+   /**
+    * This is the main method which is the program entry point.
+    * @param args Unused.
+    * @return Nothing.
+    */
+   public static void main(String[] args) {
+
+     new SwingBinConv().launch();
+
+   } // End main
+ 
+   /**
+    * This is the launch method which constucts the Swing UI.
+    * @return Nothing
+    */
+   public void launch() {
+      
+      myFont = new Font("Arial", Font.PLAIN, FONT_SIZE);
+      
+      setupNorthSection();
+      setupCenterSection();
+      setupEastSection();
+      setupFrame();
+      
+   } // End launch
+
+   /**
+    * This is the setupFrame method. Its purpose is to create a JFrame adding each JPanel to itself to display.
+    */
+   private void setupFrame() {
+     
+      //Create and set up the window.
+      frame = new JFrame(FRAME_NAME);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);    
+    
+      //add the various panels to the converter: buttons, display etc
+      frame.getContentPane().add(northPanel, BorderLayout.NORTH);
+      frame.getContentPane().add(centerPanel, BorderLayout.CENTER);
+      frame.getContentPane().add(eastPanel, BorderLayout.EAST);
+      
+      //Display the window.
+      frame.setVisible(true);
+
+   } //End setupFrame
+   
+   /**
+    * This is the setupNorthSection method. Its purpose is to setup the north section of the converter it uses a
+    * GridBagPanelLayout to hold a JLabel containing what is in effect the display area of the converter. It is here
+    * that the binary or decimal solutions will be displayed.
+    */
+   private void setupNorthSection() {
+     
+       //build the northern section of the calculator, this holds the text display
+      //panel for holding the answers display
+      northPanelLayout = new GridBagLayout();
+      GridBagConstraints constraints = new GridBagConstraints();
+      northPanel = new JPanel(northPanelLayout);
+   
+      //label which displays current mode Binary or Decimal
+      modeDisplay = new JLabel("BIN", SwingConstants.RIGHT);
+      modeDisplay.setVerticalAlignment(SwingConstants.TOP);
+      modeDisplay.setFont(myFont);
+      
+      constraints.fill = GridBagConstraints.HORIZONTAL;
+      constraints.ipady = 20;     
+      constraints.weightx = 1.0;
+      constraints.gridwidth = 1;
+      constraints.gridx = 0;
+      constraints.gridy = 0;
+      
+      northPanel.add(modeDisplay, constraints);
+      
+      //label which displays all text (answers and input)
+      textDisplay = new JLabel("0", SwingConstants.RIGHT);
+      textDisplay.setVerticalAlignment(SwingConstants.BOTTOM);
+      textDisplay.setFont(myFont);
+      
+      constraints.fill = GridBagConstraints.HORIZONTAL;
+      constraints.ipady = 40;     
+      constraints.weightx = 1.0;
+      constraints.gridwidth = 1;
+      constraints.gridx = 0;
+      constraints.gridy = 0;
+      
+      northPanel.add(textDisplay, constraints);
+
+   } // End setupNorthSection
+   
+   /**
+    * This is the setupEastSection method. Its purpose is to setup the east section of the converter. It uses a
+    * GridLayout to hold the equals button and 'AC' button.
+    */
+   private void setupEastSection() {   
+
+      //setup up the east panel, holds equals, cancel etc      
+      eastPanelLayout = new GridLayout(EAST_PANEL_ROWS, EAST_PANEL_COLUMNS);
+      eastPanel = new JPanel(eastPanelLayout);
+    
+      modeButton = new JButton("MODE");
+      modeButton.setBackground(Color.BLACK);
+      modeButton.setForeground(Color.WHITE);
+      modeButton.setFont(myFont);
+      modeButton.addActionListener(new ModeButtonActionListener());
+      eastPanel.add(modeButton);
+      
+      equalsButton = new JButton("=");
+      equalsButton.setBackground(Color.BLACK);
+      equalsButton.setForeground(Color.WHITE);
+      equalsButton.setFont(myFont);
+      equalsButton.addActionListener(new EqualsButtonActionListener());
+      eastPanel.add(equalsButton);
+
+      clearButton = new JButton("AC");
+      clearButton.setBackground(Color.RED);
+      clearButton.setForeground(Color.WHITE);
+      clearButton.setFont(myFont);
+      clearButton.addActionListener(new ClearButtonActionListener());
+      eastPanel.add(clearButton);
+      
+   } // End setupEastSection
+   
+   /**
+    * This is the setupCenterSection method. Its purpose is to set up the central section of the converter. It uses
+    * a GridLayout to hold the ten digit buttons (0-9) which are used for user input. 
+    */
+   private void setupCenterSection() {
+    
+      //setup the grid layout for the central panel containing the number buttons
+      centerPanelLayout = new GridLayout(CENTER_PANEL_ROWS,CENTER_PANEL_COLUMNS);
+      //create the central panel and make it use the new grid layout
+      centerPanel = new JPanel(centerPanelLayout);
+      
+     //create 10 buttons for digits 0 to 9
+      numberButtons = new ArrayList<JButton>(MAX_DIGIT_BUTTONS);
+
+      for(int i = 0; i < MAX_DIGIT_BUTTONS; i++) {
+         JButton btn = new JButton(digits[i]);
+         btn.setBackground(Color.BLACK);
+         btn.setForeground(Color.WHITE);
+         btn.setFont(myFont);
+         btn.addActionListener(new MyButtonActionListener(digits[i]));
+         numberButtons.add(btn);
+         centerPanel.add(btn);
+      } // End for
+      
+   } // End setupCenterSection
+   
+   private class ModeButtonActionListener implements ActionListener {
+     /**
+      * This is the actionperformed method for the mode button. In effect it switches the current mode of operation
+      * for the converter to binary or decimal conversion.
+      */
+     public void actionPerformed(ActionEvent e) {
+        //switch to new mode
+        isBinaryMode = !isBinaryMode;
+        
+        //display mode onscreen
+        if(isBinaryMode) {
+          modeDisplay.setText("BIN");
+        }
+        else {
+          modeDisplay.setText("DEC");
+        }
+        //update display
+     }//End actionPerformed
+     
+   } // End ModeButtonActionListener
+   
+   private class ClearButtonActionListener implements ActionListener {
+     /**
+      * This is the actionPerformed method for the clear button. In effect is wipes all currently displayed input
+      * resetting the display to zero.
+      * @param e The ActionEvent for this button, triggered by user input.
+      * @return Nothing.
+      */
+      public void actionPerformed(ActionEvent e) {
+         textDisplay.setText("0");
+      } // End actionPerformed
+   }// End ClearButtonActionListener
+
+   private class EqualsButtonActionListener implements ActionListener {
+     /**
+      * This is the actionPerformed method for the equals button. In effect this action will convert the current
+      * display into binary or decimal.
+      * @param e ActionEvent for this button, triggered by user input.
+      * @return Nothing.
+      */
+      public void actionPerformed(ActionEvent e) {
+         
+         String text = textDisplay.getText();
+         
+         try {
+            if(isBinaryMode) {
+              textDisplay.setText(new BinConv().convertDecToBin(text));
+            }
+            else {
+              textDisplay.setText(new BinConv().convertBinToDec(text));
+            }
+         }catch(NumberFormatException ex) {
+           textDisplay.setText("Error");
+         }
+         
+      } // End actionPerformed
+
+   } // End EqualsButtonActionListener
+
+   private class MyButtonActionListener implements ActionListener {
+      String digit;
+
+      MyButtonActionListener(String s) {
+         digit = s;
+      }
+
+      /**
+       * This is the actionPerformed method for any of the digit buttons. In effect this will trigger displaying
+       * one or more digits on display.
+       * @param e ActionEvent for this buttons, triggered by user input.
+       * @return Nothing.
+       */
+      public void actionPerformed(ActionEvent e) {
+         String text = textDisplay.getText();
+         
+         if(text.equals("Error") == false) {
+            if(text.equals("0")) {
+              text = digit;
+            } else {
+               text = text + digit; 
+            }
+            textDisplay.setText(text);
+         }
+      } //End actionPerformed
+
+   } // End ButtonActionListener
+
+} // End SwingBinConv

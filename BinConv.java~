@@ -1,0 +1,48 @@
+/**
+ * Used in SwingBinConv program. These are conversion routines for binary(base2) and decimal(base10) notation.
+ * 
+ * @author  C. Stewart
+ * @version 1.0
+ * @since   24-07-2018
+ * 
+ */ 
+class BinConv {
+
+  /**
+   * This is a convert method which converts a given decimal string to binary notation.
+   * @param in A string containing the input decimal string.
+   * @return String containing the converted binary string.
+   */
+   public String convert(String in) {
+   
+      int i;
+      String out = null;
+   
+      try {
+         i = Integer.parseInt(in);
+         out = Integer.toBinaryString(i);
+      } catch(NumberFormatException ex) {
+         ex.printStackTrace();
+      }
+      
+      return(out);     
+   } //End convert
+
+} // End BinConv
+
+
+class BinConvTestDrive {
+
+  /**
+   * This is the main method which is the program entry point. In this case the program entry point is used for testing
+   * purposes only since this file contains low level classes and functions used by other programs.
+   * @param args [0] contains a decimal string for conversion into a binary format.
+   */
+   public static void main(String[] args) {
+      BinConv myConv = new BinConv();
+
+      String result = myConv.convert(args[0]);
+      System.out.println(args[0] + " in binary is: " + result);
+   } // End main
+
+} // End BinConvTestDrive
